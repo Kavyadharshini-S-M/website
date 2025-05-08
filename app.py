@@ -4,9 +4,9 @@ from flask import Flask, jsonify, render_template_string
 
 app = Flask(__name__)
 
-# --- Configuration ---
-ROVER_IP = "192.168.1.101"  # IMPORTANT: Change this to your rover's IP address
-PING_TIMEOUT_S = 1  # Timeout for each ping attempt in seconds
+
+ROVER_IP = "192.168.1.101"  
+PING_TIMEOUT_S = 1  
 
 def check_rover_connection(ip_address):
     """
@@ -22,15 +22,6 @@ def check_rover_connection(ip_address):
     command = ['ping', param, '1', timeout_param, str(timeout_ms), ip_address]
     
     try:
-        # Run the command.
-        # stdout and stderr are suppressed for a cleaner output unless debugging.
-        # check=True will raise CalledProcessError if the command returns a non-zero exit code.
-        # However, ping's exit code behavior can vary, so we'll check explicitly.
-        process = subprocess.run(command, capture_output=True, text=True, timeout=PING_TIMEOUT_S + 1)
-        # On Linux/macOS, exit code 0 is success.
-        # On Windows, exit code 0 is success.
-        # If timeout occurs within subprocess.run, it raises TimeoutExpired.
-        # If ping command itself times out (e.g. -W on Linux), it usually returns exit code 1.
         return process.returncode == 0
     except subprocess.TimeoutExpired:
         print(f"Ping command itself timed out for {ip_address}")
@@ -44,8 +35,6 @@ def check_rover_connection(ip_address):
 
 @app.route('/')
 def index():
-    # We'll embed the HTML directly here for simplicity
-    # In a larger app, you'd use render_template('index.html')
     html_content = """
     <!DOCTYPE html>
     <html lang="en">
@@ -163,6 +152,4 @@ def rover_status():
         return jsonify({"status": "inactive", "rover_ip": ROVER_IP})
 
 if __name__ == '__main__':
-    # Make sure to use 0.0.0.0 to be accessible from other devices on your network
-    # If you only want to access it from the machine running this script, use '127.0.0.1'
     app.run(host='0.0.0.0', port=5000, debug=True)
